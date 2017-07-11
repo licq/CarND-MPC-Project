@@ -15,12 +15,14 @@ The kinematic bicycle model is used in this project which has 6 state variables.
 * **epsi** error of heading direction
 
 The update equations are as follows:
-* x[t+1] = x[t] + v[t] * cos(psi[t]) * dt
-* y[t+1] = y[t] + v[t] * sin(psi[t]) * dt
-* psi[t+1] = psi[t] + v[t] / Lf * delta[t] * dt
-* v[t+1] = v[t] + a * dt
-* cte[t+1] = f(x[t]) - y[t] + v[t] * sin(epsi[t]) * dt
-* epsi[t+1] = psi[t] - psides[t] + v[t] * delta[t] / Lf * dt
+```
+ x[t+1] = x[t] + v[t] * cos(psi[t]) * dt
+ y[t+1] = y[t] + v[t] * sin(psi[t]) * dt
+ psi[t+1] = psi[t] + v[t] / Lf * delta[t] * dt
+ v[t+1] = v[t] + a * dt
+ cte[t+1] = f(x[t]) - y[t] + v[t] * sin(epsi[t]) * dt
+ epsi[t+1] = psi[t] - psides[t] + v[t] * delta[t] / Lf * dt
+```
 
 ## Timestep Length and Elapsed Duration
 
@@ -41,10 +43,11 @@ A third polynomial is fitted to the transformed waypoints.
 ## Model Predictive Control with Latency
 
 The update equation is used to calculate the state of the car after 100ms latency. Because the vehicle coordinate system is used, so it is easy to make the transformation.
-
+```
 x = v * latency
 psi = - v * delta / Lf * latency
 cte = polyeval(coeffs, x)
+```
 
 
 ## Dependencies

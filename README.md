@@ -3,6 +3,50 @@ Self-Driving Car Engineer Nanodegree Program
 
 ---
 
+This project asks to use mpc controller to steer a car around a track in silumator. The simulator provides the state of the car includes car position and orientation and also waypoints of a reference trajectory. We should use these data to calculate the actuation and steering and sends back to the car.
+
+## The model
+
+The kinematic bicycle model is used in this project which has 6 state variables.
+* **x, y** position of car
+* **psi** heading direction
+* **v** velocity
+* **cte** cross track error
+* **epsi** error of heading direction
+
+The update equations are as follows:
+* x[t+1] = x[t] + v[t] * cos(psi[t]) * dt
+* y[t+1] = y[t] + v[t] * sin(psi[t]) * dt
+* psi[t+1] = psi[t] + v[t] / Lf * delta[t] * dt
+* v[t+1] = v[t] + a * dt
+* cte[t+1] = f(x[t]) - y[t] + v[t] * sin(epsi[t]) * dt
+* epsi[t+1] = psi[t] - psides[t] + v[t] * delta[t] / Lf * dt
+
+## Timestep Length and Elapsed Duration
+
+Timestep length N and Elapsed Duration dt determines the prediction horizon T = N * dt. The longer prediction horizon the smoother controller and also needs more computing power.
+
+I used N = 10 and t = 0.1 as the start point, the car can drive very well in the simulator. I changed N = 15 and t = 0.05, it behaves more sensitive to the current state and can't follow the trajectory very well. 
+
+## Polynomial Fitting and MPC Preprocessing
+
+The waypoints are transformed to vehicle coordinate system. 
+```
+x' = (x - px) * cos(0 - psi) - (y - py) * sin(0 - psi);
+y' = (x - px) * sin(0 - psi) + (y - py) * cos(0 - psi);
+
+```
+A third polynomial is fitted to the transformed waypoints.
+
+## Model Predictive Control with Latency
+
+The update equation is used to calculate the state of the car after 100ms latency. Because the vehicle coordinate system is used, so it is easy to make the transformation.
+
+x = v * latency
+psi = - v * delta / Lf * latency
+cte = polyeval(coeffs, x)
+
+
 ## Dependencies
 
 * cmake >= 3.5

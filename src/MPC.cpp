@@ -36,7 +36,7 @@ size_t a_start = delta_start + N - 1;
 
 
 class FG_eval {
- public:
+public:
   // Fitted polynomial coefficients
   Eigen::VectorXd coeffs;
   FG_eval(Eigen::VectorXd coeffs) { this->coeffs = coeffs; }
@@ -49,19 +49,19 @@ class FG_eval {
     // the Solver function below.
     fg[0] = 0;
 
-    for(int i = 0; i < N; i++){
+    for (int i = 0; i < N; i++) {
       fg[0] += 2000 * CppAD::pow(vars[cte_start + i] - ref_cte, 2);
       fg[0] += 2000 * CppAD::pow(vars[epsi_start + i] - ref_epsi, 2);
       fg[0] += CppAD::pow(vars[v_start + i] - ref_v, 2);
     }
 
-    for (int i = 0; i < N - 1; i++){
+    for (int i = 0; i < N - 1; i++) {
       fg[0] += 5 * CppAD::pow(vars[delta_start + i], 2);
       fg[0] += 5 * CppAD::pow(vars[a_start + i], 2);
     }
 
-    for(int i = 1; i < N - 1; i++){
-      fg[0] += 200 * CppAD::pow(vars[delta_start +i] - vars[delta_start + i - 1], 2);
+    for (int i = 1; i < N - 1; i++) {
+      fg[0] += 200 * CppAD::pow(vars[delta_start + i] - vars[delta_start + i - 1], 2);
       fg[0] += 10 * CppAD::pow(vars[a_start + i] - vars[a_start + i - 1], 2);
     }
 
@@ -72,7 +72,7 @@ class FG_eval {
     fg[1 + cte_start] = vars[cte_start];
     fg[1 + epsi_start] = vars[epsi_start];
 
-    for(int i = 0; i< N - 1; i++){
+    for (int i = 0; i < N - 1; i++) {
       AD<double> x1 = vars[x_start + i + 1];
       AD<double> y1 = vars[y_start + i + 1];
       AD<double> psi1 = vars[psi_start + i + 1];
@@ -91,7 +91,7 @@ class FG_eval {
       AD<double> a0 = vars[a_start + i];
 
       AD<double> f0 = coeffs[0] + coeffs[1] * x0 + coeffs[2] * x0 * x0 + coeffs[3] * x0 * x0 * x0;
-      AD<double> psides0 = CppAD::atan(3*coeffs[3]*x0 * x0 + 2 * coeffs[2] * x0 + coeffs[1]);
+      AD<double> psides0 = CppAD::atan(3 * coeffs[3] * x0 * x0 + 2 * coeffs[2] * x0 + coeffs[1]);
 
       fg[2 + x_start + i] = x1 - (x0 + v0 * CppAD::cos(psi0) * dt);
       fg[2 + y_start + i] = y1 - (y0 + v0 * CppAD::sin(psi0) * dt);
@@ -140,17 +140,17 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   Dvector vars_lowerbound(n_vars);
   Dvector vars_upperbound(n_vars);
   // TODO: Set lower and upper limits for variables.
-  for(int i = 0; i < delta_start; i++){
-    vars_upperbound[i] = 1.0e19;
+  for (int i = 0; i < delta_start; i++) {
     vars_lowerbound[i] = -1.0e19;
+    vars_upperbound[i] = 1.0e19;
   }
 
-  for(int i = delta_start;i < a_start; i++){
-    vars_lowerbound[i] = -0.436332*Lf;
-    vars_upperbound[i] = 0.436332*Lf;
+  for (int i = delta_start; i < a_start; i++) {
+    vars_lowerbound[i] = -0.436332 * Lf;
+    vars_upperbound[i] = 0.436332 * Lf;
   }
 
-  for(int i = a_start; i < n_vars; i++){
+  for (int i = a_start; i < n_vars; i++) {
     vars_lowerbound[i] = -1.0;
     vars_upperbound[i] = 1.0;
   }
@@ -205,8 +205,8 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
 
   // solve the problem
   CppAD::ipopt::solve<Dvector, FG_eval>(
-      options, vars, vars_lowerbound, vars_upperbound, constraints_lowerbound,
-      constraints_upperbound, fg_eval, solution);
+    options, vars, vars_lowerbound, vars_upperbound, constraints_lowerbound,
+    constraints_upperbound, fg_eval, solution);
 
   // Check some of the solution values
   ok &= solution.status == CppAD::ipopt::solve_result<Dvector>::success;
@@ -219,7 +219,7 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   result.push_back(solution.x[delta_start]);
   result.push_back(solution.x[a_start]);
 
-  for(int i = 0; i< N -1; i++){
+  for (int i = 0; i < N - 1; i++) {
     result.push_back(solution.x[x_start + i + 1]);
     result.push_back(solution.x[y_start + i + 1]);
   }
